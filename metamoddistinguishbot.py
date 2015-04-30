@@ -1,4 +1,5 @@
 import praw
+import time
 
 r = praw.Reddit(user_agent= 'Automatic moderator comment distinguishing on threads with a  "Meta" flair by Julian Rose /u/naliuj2525')
 
@@ -11,16 +12,16 @@ def run_bot():
     subreddit = r.get_subreddit('juliancss')
     mods = r.get_moderators('juliancss')
     submissions = subreddit.get_hot(limit=25)
-    print('Loaded submissions...')
     for submission in submissions:
         if submission.link_flair_text == 'Meta':
-            print('Submission found. ID:'+submission.id)
             comments = praw.helpers.flatten_tree(submission.comments)
             for comment in comments:
                 author = comment.author
-                print(author)
-                if author in mods:
+                if author in mods and comment.id not in cache:
                     comment.distinguish()
-                                       
-run_bot()
-input = input()
+                    cache.append(comment.id)
+                    print('Distinguished '+comment.id)
+
+while True:
+    run_bot()
+    time.sleep(10)
