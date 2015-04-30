@@ -5,25 +5,22 @@ r = praw.Reddit(user_agent= 'Automatic moderator comment distinguishing on threa
 r.login()
 print('Logging in...')
 
-mods = ['naliuj2525','fakeaccount']
 cache = []
 
 def run_bot():
     subreddit = r.get_subreddit('juliancss')
+    mods = r.get_moderators('juliancss')
     submissions = subreddit.get_hot(limit=25)
     print('Loaded submissions...')
     for submission in submissions:
         if submission.link_flair_text == 'Meta':
             print('Submission found. ID:'+submission.id)
-            post = r.get_submission(submission_id = submission.id)
-            comments = post.comments
+            comments = praw.helpers.flatten_tree(submission.comments)
             for comment in comments:
                 author = comment.author
-                if author in mods and comment.id not in cache:
-                    comment.delete()
-                    print('Removed')
-                    cache.append(comment.id)
-                    
-            
+                print(author)
+                if author in mods:
+                    comment.distinguish()
+                                       
 run_bot()
-input()
+input = input()
